@@ -3,11 +3,11 @@ window.dashboardComponent = Vue.extend({
         <h1>{{ title }}</h1>
         <h2>
             <small>A receber</small> <br>
-            R$ {{ statusBillsReceive }}
+            {{ totalReceive | currency 'R$ ' }}
         </h2>
         <h2>
             <small>A pagar</small> <br>
-            R$ {{ statusBillsPay }}
+            {{ totalPay | currency 'R$ ' }}
         </h2>
 
         <menu-component></menu-component>
@@ -16,30 +16,26 @@ window.dashboardComponent = Vue.extend({
     data: function() {
         return {
             title: 'Dashboard',
+            totalReceive: 0,
+            totalPay: 0
         };
     },
-    computed: {
+    created: function() {
+        this.statusBillsReceive();
+        this.statusBillsPay();
+    },
+    methods: {
         statusBillsReceive: function() {
-            var bills = this.$root.$children[0].billsReceive;
-            var total = 0;
-
-            for (var i in bills) {
-                if (bills[i].done == false){
-                    total = total + bills[i].value;
-                }
-            }
-            return total.toFixed(2).replace('.',',');
+            var self = this;
+            BillReceive.total().then(function (response) {
+                self.totalReceive = response.data.total;
+            });
         },
         statusBillsPay: function() {
-            var bills = this.$root.$children[0].billsPay;
-            var total = 0;
-
-            for (var i in bills) {
-                if (bills[i].done == false){
-                    total = total + bills[i].value;
-                }
-            }
-            return total.toFixed(2).replace('.',',');
+            var self = this;
+            Bill.total().then(function (response) {
+                self.totalPay = response.data.total;
+            });
         }
     }
 });
